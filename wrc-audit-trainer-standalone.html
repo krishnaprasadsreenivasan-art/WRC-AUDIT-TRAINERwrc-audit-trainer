@@ -256,6 +256,9 @@
     padding:12px 14px;border-radius:10px;border:1.5px solid var(--sand-line);background:#fff;margin-bottom:12px;
   }
   .contract-select:focus{outline:none;border-color:var(--red);}
+  .opt-mini-list{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+  .opt-mini{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--paper);border:1px solid var(--sand-line);border-radius:9px;padding:9px 12px;}
+  .opt-mini-name{font-size:12.5px;font-weight:600;color:var(--ink);}
   .opt-card{border:1.5px solid var(--sand-line);border-radius:12px;padding:14px 15px;cursor:pointer;background:var(--paper);}
   .opt-card.sel{border-color:var(--red);background:#FFF7F3;}
   .opt-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
@@ -602,6 +605,7 @@ var PREP_STEPS = [
   {label:'Sort last 12 months of staff data', synergy:true, manual:null, target:null,
     shots:[{key:'activeStartDate', label:'Sort/filter by the arrows next to Start Date'}]},
   {label:'Check active employees \u2014 cease anyone who\u2019s left', synergy:true, manual:null, target:null,
+    intro:'If anyone showing as active in Synergy Up has actually left, cease them \u2014 here\u2019s how:',
     shots:[
       {key:'activeEmployeesPlain', label:'Step 1 \u2014 go to Active Employees'},
       {key:'ceaseArchiveMenu', label:'Step 2 \u2014 open \u22ee \u2192 Cease/Archive'},
@@ -615,7 +619,9 @@ var PREP_STEPS = [
       {key:'activeExport', label:'Way 2 \u2014 or export all employees to Excel'}
     ]},
   {label:'Confirm contracts are on file', synergy:true, manual:null, target:'A',
-    shots:[{key:'contractOptions', label:'Options 4 & 5 need a manual review \u2014 no automation'}]},
+    shots:[{key:'contractOptions', label:'Option 5 means no contract at all \u2014 see all 5 options below'}],
+    contractOptionsList:true,
+    downloadCopy:true},
   {label:'Confirm hours worked', synergy:false, manual:'Check your clock-in system\u2019s timestamps, or ask payroll.', target:null, shots:null},
   {label:'Confirm under-18 staff are registered & managed', synergy:true, manual:null, target:'F',
     shots:null, note:'There\u2019s no dedicated under-18 register screen in Synergy Up. To keep age-evidence or a declaration form on file: Employee \u2192 \u22ee (three dots) \u2192 HR Docs \u2192 upload the document \u2192 Save.',
@@ -636,7 +642,22 @@ function renderPrep(panel){
     var body;
     if(s.synergy){
       body = '<span class="prep-tag synergy">IN SYNERGY UP</span>';
+      if(s.intro) body += '<div class="prep-note" style="margin-bottom:8px;">'+s.intro+'</div>';
       if(s.shots) body += shotSequenceHtml(s.shots);
+      if(s.contractOptionsList){
+        body += '<div class="opt-mini-list">'+CONTRACT_OPTS.map(function(o){
+          return '<div class="opt-mini"><span class="opt-mini-name">'+o.name+'</span><span class="opt-tag '+o.tag+'">'+o.tagLabel+'</span></div>';
+        }).join('')+'</div>';
+      }
+      if(s.downloadCopy){
+        body += '<div class="prep-label" style="margin:14px 0 6px;">How to download a copy of your contract</div>'+
+          '<div class="step-chain">'+
+            '<span>Employee Up</span><span class="arrow">\u2192</span>'+
+            '<span>Add/View Employees</span><span class="arrow">\u2192</span>'+
+            '<span>Download Sample</span>'+
+          '</div>'+
+          shotFrameHtml('downloadSampleBtn', 'Download a sample copy, then review it');
+      }
       if(s.note) body += '<div class="prep-note" style="margin-bottom:8px;">'+s.note+'</div>'+(s.noteShot?shotFrameHtml(s.noteShot,null):'');
     } else {
       body = '<span class="prep-tag manual">MANUAL CHECK</span><div class="prep-note">'+s.manual+'</div>';
